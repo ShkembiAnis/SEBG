@@ -25,12 +25,12 @@ public class Server implements Runnable{
 
     }
 
-    public Server(Socket clientSocket, Battlefield battle) throws IOException {
+    public Server(Socket clientSocket) throws IOException {
         this._in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
         this._out = new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream()));
         //this._battle = battle;
-        Thread t = new Thread(this, battle.toString());
-        t.start();
+        //Thread t = new Thread(this, battle.toString());
+        //t.start();
     }
 
     protected void setMyVerb(String myVerb) {
@@ -55,7 +55,6 @@ public class Server implements Runnable{
                     String[] first_line = line.split(" ");
                     setMyVerb(first_line[0]);
                     _message = first_line[1];
-//                    _version = first_line[2];
                     _http_first_line = false;
                 } else {
 
@@ -89,8 +88,6 @@ public class Server implements Runnable{
         separateMessage();
         int status = checkRequest();
         performRequest(status);
-
-
     }
 
 
