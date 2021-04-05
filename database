@@ -1,0 +1,49 @@
+drop table if exists "user" cascade;
+drop table if exists push_up_history cascade;
+drop table if exists tournament cascade;
+
+create table if not exists "user"
+(
+    user_id serial not null
+        constraint user_pk
+            primary key,
+    username text not null,
+    password text not null,
+    wins int default 0 not null,
+    draws int default 0 not null,
+    losses int default 0 not null,
+    elo int default 100 not null,
+    logged bool default false,
+    unique (username)
+);
+
+
+
+create table if not exists push_up_history
+(
+    entry_id          serial  not null
+        constraint push_up_pk
+            primary key,
+    push_ups          integer not null,
+    duration_exercise integer not null,
+    user_id           integer not null
+        constraint push_up_history_user__fk
+            references "user"
+            on delete cascade
+);
+
+
+
+create table if not exists tournament
+(
+    tour_id serial not null
+        constraint tournament_pk
+            primary key,
+    total_push_ups int not null,
+    active bool default false,
+    participant_id int not null
+        constraint tournament_user__fk
+            references "user" ("user_id")
+            on delete cascade
+);
+
