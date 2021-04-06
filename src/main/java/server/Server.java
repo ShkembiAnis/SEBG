@@ -147,6 +147,7 @@ public class Server implements Runnable{
                 case 6 -> getStats();
                 case 7 -> getScoreboard();
                 case 8 -> showHistory();
+                case 9 -> tourinfo();
             }
             _out.flush();
         }
@@ -230,10 +231,41 @@ public class Server implements Runnable{
         }
     }
 
+    private void tourinfo() throws IOException{
+        if(getUserInfoHeader() != null){
+            String[] uname = getUserInfoHeader();
+            if(isUserValid(uname[0], uname[1])){
+                String tourinfo = _db.tourinfo(uname[0]);
+                _out.write(tourinfo);
+            } else {
+                _out.write("History cannot be shown");
+            }
+        }
+    }
 
 
 
 
+
+    public static void log(String msg) {
+        File file = new File("log.txt");
+
+        // creates the file
+        try {
+            file.createNewFile();
+            // creates a FileWriter Object
+            FileWriter writer = new FileWriter(file, true);
+
+            // Writes the content to the file
+            writer.write("logged: " + msg + "\n");
+            writer.flush();
+            writer.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+    }
 
 
 

@@ -239,7 +239,7 @@ public class PostGre {
             StringBuilder scoreB = new StringBuilder("History:\n");
             while(rs.next())
             {
-                scoreB.append("\n\tUsername: \n").append(rs.getString("username"));
+                scoreB.append("\n\tUsername: ").append(rs.getString("username"));
 
             }
             int id = getIdFromUsername(username);
@@ -252,6 +252,38 @@ public class PostGre {
                 scoreB.append("\n\tEntry: \n").append(resset.getInt("entry_id"));
                 scoreB.append("\n\tPush ups: \n").append(resset.getInt("push_ups"));
                 scoreB.append("\n\tDuration per Entry: \n").append(resset.getInt("duration_exercise"));
+            }
+            return scoreB.toString();
+
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return null;
+    }
+
+
+    ////////////////////////////////// Tour Info ///////////////////////////////////////
+    public String tourinfo(String username){
+        try {
+            PreparedStatement st = connection.prepareStatement( "SELECT username FROM users" );
+            ResultSet rs = st.executeQuery();
+            StringBuilder scoreB = new StringBuilder("Tournament Info:\n");
+            while(rs.next())
+            {
+                scoreB.append("\n\tParticipant: ").append(rs.getString("username"));
+
+            }
+            int id = getIdFromUsername(username);
+            PreparedStatement st1 = connection.prepareStatement("select (tour_id, total_push_ups, active, t.participant_id) " +
+                    "from tournament as t " +
+                    "join users as u on t.participant_id = u.user_id where t.participant_id = ?");
+            st1.setInt(1, id);
+            ResultSet resset = st1.executeQuery();
+            while(rs.next()) {
+                scoreB.append("\n\tTour ID \n").append(resset.getInt("tour_id"));
+                scoreB.append("\n\tTotal Push ups: \n").append(resset.getInt("total_push_ups"));
+                scoreB.append("\n\tActive Tournament: \n").append(resset.getInt("active"));
+                scoreB.append("\n\tParticipant ID: \n").append(resset.getInt("participant_id"));
             }
             return scoreB.toString();
 

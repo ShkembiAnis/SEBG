@@ -70,4 +70,8 @@ create table if not exists tournament
             on delete cascade
 );
 
+alter table tournament
+    add constraint tournament_push_up_history__fk
+        foreign key (entry_id) references push_up_history (entry_id)
+            on update cascade on delete cascade;
 
