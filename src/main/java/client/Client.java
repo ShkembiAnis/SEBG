@@ -15,6 +15,7 @@ public class Client {
 
 
     public Client() {
+        _username = "Filan";
         _bio = "sup";
         _img = "football";
     }
@@ -33,7 +34,6 @@ public class Client {
         _img = img;
         _name = name;
         _push_ups = push_ups;
-
     }
 
     public void set_username(String _username) {
@@ -102,5 +102,9 @@ public class Client {
     }
 
 
-
+    public String getUser() {
+        return "Users data:\n" + "\n\tName: " + _name +
+                "\n\tBio: " + _bio +
+                "\n\tImg: " + _img + "\n";
+    }
 }

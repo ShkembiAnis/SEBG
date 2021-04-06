@@ -1,6 +1,7 @@
 package server;
 
 import client.Client;
+import org.json.JSONObject;
 
 import java.io.*;
 import java.net.Socket;
@@ -20,6 +21,7 @@ public class Server implements Runnable{
     private String[] _command;
     private final Map<String, String> __header = new HashMap<>();
     private boolean _http_first_line = true;
+    private Battlefield _battle;
 
     private final String[] _allowedReq = {"users", "sessions", "stats",
             "score", "history", "tournament"};
@@ -28,15 +30,15 @@ public class Server implements Runnable{
 
     }
 
-    public Server(Socket clientSocket) throws IOException {
+    public Server(Socket clientSocket, Battlefield battle) throws IOException {
         this._in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
         this._out = new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream()));
-        //this._battle = battle;
+        this._battle = battle;
         //Thread t = new Thread(this, battle.toString());
         //t.start();
     }
 
-    protected void setMyVerb(String myVerb) {
+    public void setMyVerb(String myVerb) {
         switch (myVerb) {
             case "GET" -> _myVerb = Verb.GET;
             case "POST" -> _myVerb = Verb.POST;
@@ -44,6 +46,10 @@ public class Server implements Runnable{
             case "DELETE" -> _myVerb = Verb.DELETE;
             default -> _myVerb = Verb.OTHER;
         }
+    }
+
+    public Verb getMyVerb() {
+        return _myVerb;
     }
 
     private void separateMessage() {
@@ -89,7 +95,7 @@ public class Server implements Runnable{
     }
 
 
-    private int checkRequest() throws IOException {
+    private int checkRequest(){
         if (_myVerb == Verb.OTHER) {
             System.out.println("srv: Request method not supported");
         } else {
@@ -99,9 +105,9 @@ public class Server implements Runnable{
                     return 1;
                 }else if (_command[1].equals("sessions") && _myVerb == Verb.POST) {
                     return 2;
-                }else if (_command[1].equals("user") && _myVerb == Verb.GET) {
+                }else if (_command[1].contains("users") && _myVerb == Verb.GET) {
                     return 3;
-                }else if(_command[1].equals("user") && _myVerb == Verb.PUT){
+                }else if(_command[1].contains("users") && _myVerb == Verb.PUT){
                     return 5;
                 }else if(_command[1].equals("stats") && _myVerb == Verb.GET){
                     return 6;
@@ -143,23 +149,78 @@ public class Server implements Runnable{
             switch (status) {
                 case 1 -> createUser(_payload);
                 case 2 -> logInUser(_payload);
+                case 3 -> getUser();
                 case 5 -> editUser();
                 case 6 -> getStats();
                 case 7 -> getScoreboard();
                 case 8 -> showHistory();
                 case 9 -> tourinfo();
+                case 10 -> addEntry(_payload);
             }
             _out.flush();
         }
 
+    private void getUser() throws IOException {
+        if(getUserInfoHeader() != null){
+            String[] uname = getUserInfoHeader();
+            if(isUserValid(uname[0], uname[1])){
+                String user = _db.getUser(uname[0]);
+                _out.write(user);
+                Server.log(user + "\r\n");
+            }else{
+                _out.write("User is not valid");
+                Server.log("User is not valid\r\n");
+            }
+        }else{
+            _out.write("No user entered.");
+            Server.log("No user entered.\r\n");
+        }
+    }
+
+    private void addEntry(String json) throws IOException {
+        if(getUserInfoHeader() != null){
+            String[] uname = getUserInfoHeader();
+            if(isUserValid(uname[0], uname[1])){
+
+                JSONObject _jsonUser = new JSONObject(json);
+                String type = _jsonUser.getString("Name");
+                int count = _jsonUser.getInt("Count");
+                int duration = _jsonUser.getInt("DurationInSeconds");
+                Client user = new Client();
+                user.set_username(uname[0]);
+                if(_battle.addPlayer(uname[0], type, count, duration) == 1){
+                    _out.write("User added to the tournament. Waiting for opponent\n");
+                    Server.log("User added to the tournament. Waiting for opponent\r\n");
+                }else if(_battle.addPlayer(uname[0], type, count, duration) == 2){
+                    _out.write("User added to the tournament. Battle starts\n");
+                    Server.log("User added to the tournament. Battle starts\r\n");
+                }else if(_battle.addPlayer(uname[0], type, count, duration) == 3){
+                    _out.write("User cannot enter twice\n");
+                    Server.log("User cannot enter twice\r\n");
+                } else{
+                    _out.write("Tournament is taking place. Please wait\n");
+                    Server.log("Tournament is taking place. Please wait\r\n");
+                    String outcome = _battle.start();
+                    _out.write(outcome);
+                    Server.log(outcome + "\r\n");
+                }
+
+            } else {
+                _out.write("Scoreboard cannot be shown");
+                Server.log("Scoreboard cannot be shown\r\n");
+            }
+        }
+    }
 
 
     private void createUser(String json) throws IOException {
         Client user = new Client(json);
         if (_db.registerUser(user) == 1) {
             _out.write("New user is created\n");
+            Server.log("New user is created\r\n");
         } else {
             _out.write("Username already exists\n");
+            Server.log("Username already exists\r\n");
         }
     }
 
@@ -168,8 +229,10 @@ public class Server implements Runnable{
         _db.logInUser(user);
         if (_db.logInUser(user) == 0) {
             _out.write("Can't log user in\n");
+            Server.log("Can't log user in\r\n");
         } else {
             _out.write("User is logged.\n");
+            Server.log("User is logged.\r\n");
         }
     }
 
@@ -179,16 +242,21 @@ public class Server implements Runnable{
         if(getUserInfoHeader() != null){
             String[] uname = getUserInfoHeader();
             if(isUserValid(uname[0], uname[1]) && _command[2].equals(uname[0]) ){
+
                 if(_db.editUser(_payload, uname[0])){
                     _out.write("User updated");
+                    Server.log("User updated\r\n");
                 }else{
                     _out.write("Something went wrong");
+                    Server.log("Something went wrong\r\n");
                 }
             }else{
                 _out.write("User is not valid");
+                Server.log("User is not valid\r\n");
             }
         }else{
             _out.write("No user entered.");
+            Server.log("No user entered.\r\n");
         }
     }
 
@@ -199,11 +267,14 @@ public class Server implements Runnable{
             if(isUserValid(uname[0], uname[1])){
                 String stats = _db.getStats(uname[0]);
                 _out.write(stats);
+                Server.log(stats);
             }else{
                 _out.write("User is not valid");
+                Server.log("User is not valid\r\n");
             }
         }else{
             _out.write("No user entered.");
+            Server.log("No user entered.\r\n");
         }
     }
 
@@ -215,6 +286,7 @@ public class Server implements Runnable{
                 _out.write(score);
             } else {
                 _out.write("Scoreboard cannot be shown");
+                Server.log("Scoreboard cannot be shown\r\n");
             }
         }
     }
@@ -225,8 +297,10 @@ public class Server implements Runnable{
             if(isUserValid(uname[0], uname[1])){
                 String history = _db.showHistory(uname[0]);
                 _out.write(history);
+                Server.log(history);
             } else {
                 _out.write("History cannot be shown");
+                Server.log("History cannot be shown\r\n");
             }
         }
     }
@@ -237,8 +311,10 @@ public class Server implements Runnable{
             if(isUserValid(uname[0], uname[1])){
                 String tourinfo = _db.tourinfo(uname[0]);
                 _out.write(tourinfo);
+                Server.log(tourinfo);
             } else {
                 _out.write("History cannot be shown");
+                Server.log("History cannot be shown\r\n");
             }
         }
     }
@@ -266,8 +342,6 @@ public class Server implements Runnable{
 
 
     }
-
-
 
 
     private String[] getUserInfoHeader() {

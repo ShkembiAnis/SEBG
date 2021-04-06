@@ -75,3 +75,10 @@ alter table tournament
         foreign key (entry_id) references push_up_history (entry_id)
             on update cascade on delete cascade;
 
+
+
+select psh.user_id, psh.push_ups from push_up_history as psh join users as u on psh.user_id = u.user_id where u.user_id = 2
+
+select username, bio, img, 'name', push_ups, elo from users as u join push_up_history as psh on u.user_id = psh.user_id where username =
+
+select username, bio, img, push_ups, elo from users as u join push_up_history as psh on u.user_id = psh.user_id where username = 'altenhof';

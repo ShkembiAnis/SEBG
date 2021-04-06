@@ -1,0 +1,171 @@
+logged: srv: Starting server...
+
+logged: srv: Server is running in port 10001
+
+logged: Username already exists
+
+logged: Username already exists
+
+logged: User is logged.
+
+logged: User is logged.
+
+logged: srv: Starting server...
+
+logged: srv: Server is running in port 10001
+
+logged: Username already exists
+
+logged: Username already exists
+
+logged: Username already exists
+
+logged: Username already exists
+
+logged: User is logged.
+
+logged: User is logged.
+
+logged: Can't log user in
+
+logged: Users data:
+
+	Name: null
+	Bio: sup
+	Img: football
+
+
+logged: Users data:
+
+	Name: null
+	Bio: sup
+	Img: football
+
+
+logged: User updated
+
+logged: User updated
+
+logged: Users data:
+
+	Name: null
+	Bio: sup
+	Img: football
+
+
+logged: Users data:
+
+	Name: null
+	Bio: sup
+	Img: football
+
+
+logged: Users data:
+
+	Name: null
+	Bio: sup
+	Img: football
+
+
+logged: Users data:
+
+	Name: null
+	Bio: sup
+	Img: football
+
+
+logged: User is not valid
+
+logged: User is not valid
+
+logged: Users data:
+
+	Name: null
+	Bio: sup
+	Img: football
+
+
+logged: Stats:
+
+	Username: kienboec
+	Bio: me playin...
+	Img: :-)
+	Elo: 88
+	Push ups: 480
+logged: Stats:
+
+	Username: altenhof
+	Bio: me codin...
+	Img: :-D
+	Elo: 124
+	Push ups: 600
+logged: History:
+
+	Username: kienboec
+	Username: altenhof
+logged: History:
+
+	Username: kienboec
+	Username: altenhof
+logged: Tournament Info:
+
+	Participant: kienboec
+	Participant: altenhof
+logged: Tournament Info:
+
+	Participant: kienboec
+	Participant: altenhof
+logged: User added to the tournament. Waiting for opponent
+
+logged: Tournament is taking place. Please wait
+
+logged: Time when started: 2021/04/06 23:16:56
+Winner is altenhof
+
+
+logged: Tournament Info:
+
+	Participant: altenhof
+	Participant: kienboec
+logged: Tournament Info:
+
+	Participant: altenhof
+	Participant: kienboec
+logged: Stats:
+
+	Username: kienboec
+	Bio: me playin...
+	Img: :-)
+	Elo: 87
+	Push ups: 520
+logged: Stats:
+
+	Username: altenhof
+	Bio: me codin...
+	Img: :-D
+	Elo: 126
+	Push ups: 650
+logged: History:
+
+	Username: altenhof
+	Username: kienboec
+logged: History:
+
+	Username: altenhof
+	Username: kienboec
+logged: Tournament is taking place. Please wait
+
+logged: Time when started: 2021/04/06 23:16:56
+Winner is altenhof
+Time when started: 2021/04/06 23:16:57
+Winner is altenhof
+
+
+logged: Tournament Info:
+
+	Participant: altenhof
+	Participant: kienboec
+logged: Tournament Info:
+
+	Participant: altenhof
+	Participant: kienboec
