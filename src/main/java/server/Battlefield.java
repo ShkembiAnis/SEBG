@@ -2,14 +2,13 @@ package server;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
 
 public class Battlefield {
     private String _username1, _username2, _type1, _type2;
     private int _count1, _count2, _duration1, _duration2;
     private final PostGre _db = new PostGre();
     private int player1, player2;
-    private StringBuilder _msg = new StringBuilder();
+    private final StringBuilder _msg = new StringBuilder();
 
     public Battlefield(){
         player1 = 0;
@@ -43,24 +42,24 @@ public class Battlefield {
     public String start() {
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
         LocalDateTime now = LocalDateTime.now();
-        _msg.append("Time when started: " + dtf.format(now) + "\n");
+        _msg.append("Time when started: ").append(dtf.format(now)).append("\n");
         if(sameType()){
             _db.addEntry(_type1, _duration1, _count1, _username1);
             _db.addEntry(_type2, _duration2, _count2, _username2);
             if(_count1 > _count2){
                 _db.addWin(_username1);
                 _db.addLoss(_username2);
-                _msg.append("Winner is " + _username1 + "\n");
+                _msg.append("Winner is ").append(_username1).append("\n");
                 return _msg.toString();
             }else if(_count2 > _count1){
                 _db.addWin(_username2);
                 _db.addLoss(_username1);
-                _msg.append("Winner is " + _username2 + "\n");
+                _msg.append("Winner is ").append(_username2).append("\n");
                 return _msg.toString();
             }else{
                 _db.addDraw(_username1);
                 _db.addDraw(_username2);
-                _msg.append("Draw between " + _username1 + " and " + _username2 + "\n");
+                _msg.append("Draw between ").append(_username1).append(" and ").append(_username2).append("\n");
                 return _msg.toString();
             }
         }else{
@@ -70,10 +69,6 @@ public class Battlefield {
     }
 
     public boolean sameType(){
-        if(_type1.equals(_type2)){
-            return true;
-        }else{
-            return false;
-        }
+        return _type1.equals(_type2);
     }
 }

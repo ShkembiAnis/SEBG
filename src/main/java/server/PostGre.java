@@ -1,13 +1,10 @@
 package server;
 
 import client.Client;
-import client.Push_Up_History;
 import org.json.JSONObject;
 import org.mindrot.jbcrypt.BCrypt;
 
 import java.sql.*;
-
-import static java.sql.DriverManager.getConnection;
 
 public class PostGre {
 
@@ -197,7 +194,7 @@ public class PostGre {
     }
 
 
-        public String getScoreboard(String username) {
+        public String getScoreboard() {
             try {
                 PreparedStatement st = connection.prepareStatement("select username, elo, wins, losses, draws from users");
 //                st.setString(1, username);
@@ -301,7 +298,7 @@ public class PostGre {
     }
 
 
-    public int addEntry(String type1, int duration1, int count1, String username1) {
+    public void addEntry(String type1, int duration1, int count1, String username1) {
         try {
             PreparedStatement st = connection.prepareStatement("INSERT INTO push_up_history (push_ups, duration_exercise, user_id, type) VALUES (?, ?, ?, ?)");
             st.setInt(1, count1);
@@ -310,11 +307,9 @@ public class PostGre {
             st.setString(4, type1);
             st.executeUpdate();
             st.close();
-            return 1;
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
-        return 0;
     }
 
     public int addWin(String username1) {

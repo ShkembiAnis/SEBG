@@ -282,7 +282,7 @@ public class Server implements Runnable{
         if(getUserInfoHeader() != null){
             String[] uname = getUserInfoHeader();
             if(isUserValid(uname[0], uname[1])){
-                String score = _db.getScoreboard(uname[0]);
+                String score = _db.getScoreboard();
                 _out.write(score);
             } else {
                 _out.write("Scoreboard cannot be shown");

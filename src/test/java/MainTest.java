@@ -1,5 +1,4 @@
 import client.Client;
-import org.checkerframework.checker.units.qual.C;
 import org.junit.jupiter.api.Test;
 import server.Battlefield;
 import server.PostGre;
@@ -39,7 +38,7 @@ public class MainTest {
         user.set_username("Anis");
         db.registerUser(user);
         db.logInUser(user);
-        assertEquals(true, db.isLogged(user.getUsername()));
+        assertTrue(db.isLogged(user.getUsername()));
     }
 
     @Test

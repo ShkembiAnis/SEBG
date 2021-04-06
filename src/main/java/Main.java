@@ -8,7 +8,7 @@ import java.net.Socket;
 public class Main {
 
     public static Server server = new Server();
-    private static Battlefield battle = new Battlefield();
+    private static final Battlefield battle = new Battlefield();
     static ServerSocket _sSocket = null;
     static final int _port = 10001;
 
