@@ -1,5 +1,7 @@
 package server;
 
+import client.Client;
+
 import java.io.*;
 import java.net.Socket;
 import java.util.Arrays;
@@ -8,6 +10,7 @@ import java.util.Map;
 
 public class Server implements Runnable{
 
+    private final PostGre _db = new PostGre();
     private BufferedReader _in;
     private BufferedWriter _out;
     private StringBuilder _messageSeparator = new StringBuilder();
@@ -47,7 +50,6 @@ public class Server implements Runnable{
         //separate message
         String[] request = _messageSeparator.toString().split(System.getProperty("line.separator"));
         _messageSeparator = new StringBuilder();
-        boolean skip = true;
         for (String line : request) {
             if (!line.isEmpty()) {
                 if (_http_first_line) {
@@ -65,19 +67,15 @@ public class Server implements Runnable{
                     }
                     //saving the payload
                     else {
-                        if (skip) {
-                            skip = false;
-                        } else {
-                            _messageSeparator.append(line);
-                            _messageSeparator.append("\r\n");
-                        }
-
+                        _messageSeparator.append(line);
+                        _messageSeparator.append("\r\n");
                     }
                 }
             }
         }
         _payload = _messageSeparator.toString();
     }
+
 
     public void readRequest() throws IOException {
         //read and save request
@@ -89,7 +87,6 @@ public class Server implements Runnable{
         int status = checkRequest();
         performRequest(status);
     }
-
 
 
     private int checkRequest() throws IOException {
@@ -149,8 +146,46 @@ public class Server implements Runnable{
                 _out.write("Content-Type: text/html\r\n");
                 _out.write("\r\n");
             }
+            switch (status) {
+                case 1 -> createUser(_payload);
+                case 2 -> logInUser(_payload);
+            }
             _out.flush();
         }
+
+    private void createUser(String json) throws IOException {
+        Client user = new Client(json);
+        if (_db.registerUser(user) == 1) {
+            _out.write("New user is created\n");
+        } else {
+            _out.write("Username already exists\n");
+        }
+    }
+
+    private void logInUser(String json) throws IOException {
+        Client user = new Client(json);
+        _db.logInUser(user);
+        if (_db.logInUser(user) == 0) {
+            _out.write("Can't log user in\n");
+        } else {
+            _out.write("User is logged.\n");
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     public void run() {
 
