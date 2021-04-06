@@ -1,6 +1,8 @@
 package server;
 
 import client.Client;
+import client.Push_Up_History;
+import org.json.JSONObject;
 import org.mindrot.jbcrypt.BCrypt;
 
 import java.sql.*;
@@ -54,7 +56,7 @@ public class PostGre {
         return 0;
     }
 
-
+    ////////////////////////////////// Register User ///////////////////////////////////////
     public int registerUser(Client user){
         try {
             PreparedStatement user_exst = connection.prepareStatement( "SELECT * FROM users where username = ? " );
@@ -63,13 +65,11 @@ public class PostGre {
             if(rs.next()){
                 return 0;
             }else{
-                PreparedStatement st = connection.prepareStatement("INSERT INTO users (username, password) VALUES (?, ?)");
+                PreparedStatement st = connection.prepareStatement("INSERT INTO users (username, password, name) VALUES (?, ?, ?)");
                 st.setString(1, user.getUsername());
                 st.setString(2, BCrypt.hashpw(user.getPassword(), BCrypt.gensalt()));
+                st.setString(3, user.getUsername());
                 st.executeUpdate();
-                //st = connection.prepareStatement("INSERT into score (user_id, wins, loses, draws, coins_spent) values (?, 0, 0, 0, 0)");
-
-                //st.executeUpdate();
                 st.close();
                 return 1;
             }
@@ -80,6 +80,12 @@ public class PostGre {
         return 0;
     }
 
+
+
+
+
+
+    ////////////////////////////////// Login User ///////////////////////////////////////
     public int logInUser(Client user) {
         PreparedStatement stm;
         try {
@@ -108,6 +114,9 @@ public class PostGre {
         return 0;
     }
 
+
+
+    ////////////////////////////////// Is User Logged ///////////////////////////////////////
     public boolean isLogged(String username){
         PreparedStatement user_exst;
         try {
@@ -124,4 +133,147 @@ public class PostGre {
         }
         return false;
     }
+
+
+
+
+    ////////////////////////////////// Edit User ///////////////////////////////////////
+    public boolean editUser(String json, String username) {
+        JSONObject user = new JSONObject(json);
+        try {
+            PreparedStatement st = connection.prepareStatement("update users set name = ?, bio = ?, img = ?  where username = ?");
+            st.setString(1, user.getString("Name"));
+            st.setString(2, user.getString("Bio"));
+            st.setString(3, user.getString("Image"));
+            st.setString(4, username);
+            int count = st.executeUpdate();
+            if(count > 0){
+                return true;
+            }
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return false;
+    }
+
+
+
+
+    ////////////////////////////////// Get User Stats ///////////////////////////////////////
+    public String getStats(String username) {
+        try {
+            PreparedStatement st = connection.prepareStatement("select username, bio, img, name, push_ups from users as u join push_up_history" +
+                    " as psh on u.user_id = psh.user_id where username = ?");
+            st.setString(1, username);
+            ResultSet rs = st.executeQuery();
+            Client user = new Client();
+            Push_Up_History push = new Push_Up_History();
+
+            if(!rs.next()){
+                user.set_username(username);
+                return user.getStats();
+            }else{
+                while(rs.next())
+                {
+                    user = new Client(rs.getString("username"), rs.getString("bio"),
+                            rs.getString("img"), rs.getString("name"),
+                            rs.getInt("push_ups"));
+                    user.setElo(rs.getInt("elo"));
+                    push.setPush_ups(rs.getInt("push_ups"));
+                }
+            }
+            return user.getStats();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return null;
+    }
+
+
+        public String getScoreboard(String username) {
+            try {
+                PreparedStatement st = connection.prepareStatement("select username, elo, wins, losses, draws from users");
+//                st.setString(1, username);
+                ResultSet rs = st.executeQuery();
+                StringBuilder scoreB = new StringBuilder("Scoreboard:\n");
+                while(rs.next())
+                {
+                    scoreB.append("\n\tName: ").append(rs.getString("username"));
+                    scoreB.append("\n\tElo: ").append(rs.getInt("elo"));
+                    scoreB.append("\n\tWins: ").append(rs.getString("wins"));
+                    scoreB.append("\n\tLoses: ").append(rs.getString("losses"));
+                    scoreB.append("\n\tDraws: ").append(rs.getString("draws"));
+
+                }
+                int id = getIdFromUsername(username);
+
+                PreparedStatement st1 = connection.prepareStatement("select (psh.user_id, push_ups) from push_up_history as psh " +
+                        "join users as u on psh.user_id = u.user_id where u.user_id = ?");
+                st1.setInt(1, id);
+                ResultSet resset = st1.executeQuery();
+                while(rs.next()) {
+                    scoreB.append("\n\tPush ups: \n").append(resset.getInt("push_ups"));
+                }
+                //scoreB.append("\n\tPush ups: ").append(rs.getString("push_ups"));
+                return scoreB.toString();
+            } catch (SQLException throwables) {
+                throwables.printStackTrace();
+            }
+            return null;
+        }
+
+
+
+
+
+
+
+
+
+    ////////////////////////////////// User History ///////////////////////////////////////
+    public String showHistory(String username){
+        try {
+            PreparedStatement st = connection.prepareStatement( "SELECT username FROM users" );
+            //user_exst.setInt(1, user.(getIdFromUsername()));
+            ResultSet rs = st.executeQuery();
+            StringBuilder scoreB = new StringBuilder("History:\n");
+            while(rs.next())
+            {
+                scoreB.append("\n\tUsername: \n").append(rs.getString("username"));
+
+            }
+            int id = getIdFromUsername(username);
+            PreparedStatement st1 = connection.prepareStatement("select (entry_id, push_ups, duration_exercise, psh.user_id) " +
+                    "from push_up_history as psh " +
+                    "join users as u on psh.user_id = u.user_id where u.user_id = ?");
+            st1.setInt(1, id);
+            ResultSet resset = st1.executeQuery();
+            while(rs.next()) {
+                scoreB.append("\n\tEntry: \n").append(resset.getInt("entry_id"));
+                scoreB.append("\n\tPush ups: \n").append(resset.getInt("push_ups"));
+                scoreB.append("\n\tDuration per Entry: \n").append(resset.getInt("duration_exercise"));
+            }
+            return scoreB.toString();
+
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return null;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }

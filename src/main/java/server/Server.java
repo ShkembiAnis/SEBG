@@ -21,8 +21,8 @@ public class Server implements Runnable{
     private final Map<String, String> __header = new HashMap<>();
     private boolean _http_first_line = true;
 
-    private final String[] _allowedReq = {"users", "sessions", "packages", "transactions",
-            "cards", "deck", "stats", "score", "battles", "tradings", "deck?format=plain"};
+    private final String[] _allowedReq = {"users", "sessions", "stats",
+            "score", "history", "tournament"};
 
     public Server() {
 
@@ -99,36 +99,30 @@ public class Server implements Runnable{
                     return 1;
                 }else if (_command[1].equals("sessions") && _myVerb == Verb.POST) {
                     return 2;
-                }else if (_command[1].equals("packages") && _myVerb == Verb.POST) {
+                }else if (_command[1].equals("user") && _myVerb == Verb.GET) {
                     return 3;
-                }else if(_command[1].equals("cards") && _myVerb == Verb.GET){
+                }else if(_command[1].equals("user") && _myVerb == Verb.PUT){
                     return 5;
-                }else if(_command[1].equals("deck") && _myVerb == Verb.GET){
-                    return 6;
-                }else if(_command[1].equals("deck") && _myVerb == Verb.PUT){
-                    return 7;
-                }else if(_command[1].equals("deck?format=plain") && _myVerb == Verb.GET){
-                    return 8;
-                }else if(_command[1].equals("users") && _myVerb == Verb.GET){
-                    return 9;
-                }else if(_command[1].equals("users") && _myVerb == Verb.PUT){
-                    return 10;
                 }else if(_command[1].equals("stats") && _myVerb == Verb.GET){
-                    return 11;
+                    return 6;
                 }else if(_command[1].equals("score") && _myVerb == Verb.GET){
-                    return 12;
-                }else if(_command[1].equals("battles") && _myVerb == Verb.POST){
-                    return 13;
+                    return 7;
+                }else if(_command[1].equals("history") && _myVerb == Verb.GET){
+                    return 8;
+                }else if(_command[1].equals("tournament") && _myVerb == Verb.GET){
+                    return 9;
+                }else if(_command[1].equals("history") && _myVerb == Verb.POST){
+                    return 10;
                 }
-                if (_command.length == 3) {
-                    if (_command[1].equals("transactions") && _command[2].equals("packages")) {
-                        if (_myVerb == Verb.POST) {
-                            return 4;
-                        }
-                    } else {
-                        return 0;
-                    }
-                }
+//                if (_command.length == 3) {
+//                    if (_command[1].equals("transactions") && _command[2].equals("packages")) {
+//                        if (_myVerb == Verb.POST) {
+//                            return 4;
+//                        }
+//                    } else {
+//                        return 0;
+//                    }
+//                }
             }
         }
         return 0;
@@ -149,9 +143,15 @@ public class Server implements Runnable{
             switch (status) {
                 case 1 -> createUser(_payload);
                 case 2 -> logInUser(_payload);
+                case 5 -> editUser();
+                case 6 -> getStats();
+                case 7 -> getScoreboard();
+                case 8 -> showHistory();
             }
             _out.flush();
         }
+
+
 
     private void createUser(String json) throws IOException {
         Client user = new Client(json);
@@ -171,6 +171,92 @@ public class Server implements Runnable{
             _out.write("User is logged.\n");
         }
     }
+
+
+
+    private void editUser() throws IOException {
+        if(getUserInfoHeader() != null){
+            String[] uname = getUserInfoHeader();
+            if(isUserValid(uname[0], uname[1]) && _command[2].equals(uname[0]) ){
+                if(_db.editUser(_payload, uname[0])){
+                    _out.write("User updated");
+                }else{
+                    _out.write("Something went wrong");
+                }
+            }else{
+                _out.write("User is not valid");
+            }
+        }else{
+            _out.write("No user entered.");
+        }
+    }
+
+
+    private void getStats() throws IOException {
+        if(getUserInfoHeader() != null){
+            String[] uname = getUserInfoHeader();
+            if(isUserValid(uname[0], uname[1])){
+                String stats = _db.getStats(uname[0]);
+                _out.write(stats);
+            }else{
+                _out.write("User is not valid");
+            }
+        }else{
+            _out.write("No user entered.");
+        }
+    }
+
+    private void getScoreboard() throws IOException{
+        if(getUserInfoHeader() != null){
+            String[] uname = getUserInfoHeader();
+            if(isUserValid(uname[0], uname[1])){
+                String score = _db.getScoreboard(uname[0]);
+                _out.write(score);
+            } else {
+                _out.write("Scoreboard cannot be shown");
+            }
+        }
+    }
+
+    private void showHistory() throws IOException{
+        if(getUserInfoHeader() != null){
+            String[] uname = getUserInfoHeader();
+            if(isUserValid(uname[0], uname[1])){
+                String history = _db.showHistory(uname[0]);
+                _out.write(history);
+            } else {
+                _out.write("History cannot be shown");
+            }
+        }
+    }
+
+
+
+
+
+
+
+
+
+    private String[] getUserInfoHeader() {
+        if(__header.get("Authorization") != null){
+            String[] token = __header.get("Authorization").split(" ");
+            return token[1].split("-");
+        }
+        return null;
+
+    }
+
+    private boolean isUserValid(String username, String token) {
+        if (_db.isLogged(username)) {
+            return token.contains("sebToken");
+
+        } else {
+            return false;
+        }
+    }
+
+
 
 
 
