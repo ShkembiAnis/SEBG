@@ -21,23 +21,23 @@ Client Package besteht aus:
 Am Ende steht die main Klasse wo ein ServerSocket auf port 10001 erstellt wurde und für jedes neues Request gibt es „new client“ zurück damit man weiß, wenn eine neue Request kommt. 
  
 Server -> Class Server: 
-Hier wurden alle Methoden die von curl gerufen wird, damit man das Programm teste, ob es richtig gebaut ist. 
+- Hier wurden alle Methoden die von curl gerufen wird, damit man das Programm teste, ob es richtig gebaut ist. 
  
 Server -> Class PostGre: 
-Nach der verbindung mit der Datenbank hier wurden alle selects, inserts, updates auf der Datenbank gemacht.  
+- Nach der verbindung mit der Datenbank hier wurden alle selects, inserts, updates auf der Datenbank gemacht.  
  
 Server -> Class Battlefield: 
-Hier nimmt der Battle statt und die Benutzer machen eine Race welche von denen mehr push_ups in 2 Minuten macht. Es kann auch sein, dass keiner gewinnt und jeder ein Punkt bekommt. 
+- Hier nimmt der Battle statt und die Benutzer machen eine Race welche von denen mehr push_ups in 2 Minuten macht. Es kann auch sein, dass keiner gewinnt und jeder ein Punkt bekommt. 
  
 Server -> Class Verb (Enum): 
-Hier wurden die http Kommanden aufgelistet (post, get, put, delete) die auf der Class Server später geruft werden. 
+- Hier wurden die http Kommanden aufgelistet (post, get, put, delete) die auf der Class Server später geruft werden. 
  
 Client -> Class Client: 
-Hier wird der Benutzer deklariert (Objekt erstellt) und dann auf Class PostGre initialisiert. Das hilft die Benutzer zu aktualisieren.  
+- Hier wird der Benutzer deklariert (Objekt erstellt) und dann auf Class PostGre initialisiert. Das hilft die Benutzer zu aktualisieren.  
  
  
 Client -> Class Push_Up_History 
-Hier werden die Push Ups von Benutzer deklariert, aber diese Klasse wurde nicht verwendet.
+- Hier werden die Push Ups von Benutzer deklariert, aber diese Klasse wurde nicht verwendet.
  
  
 # Integration Tests: 
